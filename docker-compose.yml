@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  produtos-service:
+    build: ./produtos-service
+    container_name: produtos-service
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+
+  clientes-service:
+    build: ./clientes-service
+    container_name: clientes-service
+    ports:
+      - "3002:3000"
+    depends_on:
+      - db
+
+  vendas-service:
+    build: ./vendas-service
+    container_name: vendas-service
+    ports:
+      - "3003:3000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - produtos-service
+      - clientes-service
+      - vendas-service
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vendasdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  db_data:
