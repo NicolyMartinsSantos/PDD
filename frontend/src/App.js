@@ -1,50 +1,56 @@
-import React, { useState, useEffect } from "react";
 
-function App() {
-  const [produtos, setProdutos] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [vendas, setVendas] = useState([]);
 
-  useEffect(() => {
-    fetch("http://localhost:3001/produtos")
-      .then(res => res.json())
-      .then(data => setProdutos(data));
 
-    fetch("http://localhost:3002/clientes")
-      .then(res => res.json())
-      .then(data => setClientes(data));
+const produtos = [];
+const clientes = [];
+const vendas = [];
 
-    fetch("http://localhost:3003/vendas")
-      .then(res => res.json())
-      .then(data => setVendas(data));
-  }, []);
 
-  return (
-    <div>
-      <h1>Controle de Vendas</h1>
-
-      <h2>Produtos</h2>
-      <ul>
-        {produtos.map(p => (
-          <li key={p.id}>{p.nome} - R${p.valor}</li>
-        ))}
-      </ul>
-
-      <h2>Clientes</h2>
-      <ul>
-        {clientes.map(c => (
-          <li key={c.id}>{c.nome} - {c.telefone}</li>
-        ))}
-      </ul>
-
-      <h2>Vendas</h2>
-      <ul>
-        {vendas.map(v => (
-          <li key={v.id}>Cliente {v.cliente_id} comprou Produto {v.produto_id} (Qtd: {v.quantidade})</li>
-        ))}
-      </ul>
-    </div>
-  );
+export function cadastrarProduto(nome, descricao, valor) {
+  const produto = { id: produtos.length + 1, nome, descricao, valor };
+  produtos.push(produto);
+  return produto;
 }
 
-export default App;
+export function listarProdutos() {
+  return produtos;
+}
+
+
+export function cadastrarCliente(nome, telefone) {
+  const cliente = { id: clientes.length + 1, nome, telefone };
+  clientes.push(cliente);
+  return cliente;
+}
+
+export function listarClientes() {
+  return clientes;
+}
+
+
+export function realizarVenda(clienteId, produtoIds) {
+  // produtoIds: array de ids de produtos vendidos
+  const cliente = clientes.find(c => c.id === clienteId);
+  if (!cliente) throw new Error('Cliente não encontrado');
+
+  const produtosVendidos = produtoIds.map(pid => {
+    const produto = produtos.find(p => p.id === pid);
+    if (!produto) throw new Error(`Produto com id ${pid} não encontrado`);
+    return produto;
+  });
+
+  const valorTotal = produtosVendidos.reduce((sum, p) => sum + p.valor, 0);
+  const venda = {
+    id: vendas.length + 1,
+    cliente,
+    produtos: produtosVendidos,
+    valorTotal,
+    data: new Date(),
+  };
+  vendas.push(venda);
+  return venda;
+}
+
+export function listarVendas() {
+  return vendas;
+}

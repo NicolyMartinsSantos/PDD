@@ -7,7 +7,14 @@ services:
     ports:
       - "3001:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: vendasdb
 
   clientes-service:
     build: ./clientes-service
@@ -15,7 +22,14 @@ services:
     ports:
       - "3002:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: vendasdb
 
   vendas-service:
     build: ./vendas-service
@@ -23,7 +37,14 @@ services:
     ports:
       - "3003:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: vendasdb
 
   frontend:
     build: ./frontend
@@ -49,6 +70,11 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:
